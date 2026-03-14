@@ -1,7 +1,5 @@
 {
-  "ComponentTest": {
-    "files": [
-      "Components/ComponentTest"
-    ]
-  }
+  "ComponentTestOne": { "files": ["Components/ComponentTestOne"] },
+  "ComponentTestTwo": { "files": ["Components/ComponentTestTwo"] },
+  "ComponentTestTree": { "files": ["Components/ComponentTestTree"] }
 }

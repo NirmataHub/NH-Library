@@ -1,17 +1,12 @@
 {
   "name": "nh-library",
-  "version": "1.0.2",
-  "description": "CLI-based React component library",
-  "main": "cli/index.cjs",
+  "version": "1.0.3",
   "bin": {
-    "nh-lib": "./cli/index.cjs"
+    "nh-library": "./cli/index.cjs"
   },
   "files": [
     "cli",
-    "registry",
-    "Components"
+    "registry"
   ],
-  "type": "commonjs",
-  "author": "Your Name",
-  "license": "MIT"
+  "type": "commonjs"
 }

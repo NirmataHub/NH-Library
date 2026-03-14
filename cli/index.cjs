@@ -3,82 +3,56 @@
 const fs = require("fs");
 const path = require("path");
 
-// 1. Setup Paths
-// __dirname is /node_modules/nh-library/cli
-// We need to go up one level to reach /node_modules/nh-library/
-const libraryRoot = path.join(__dirname, "..");
-const projectRoot = process.cwd();
-
-// 2. Get the component name from CLI arguments
+const RAW_BASE_URL = "https://raw.githubusercontent.com/NirmataHub/NH-Library/main/";
 const componentName = process.argv[2];
+const libraryRoot = path.join(__dirname, "..");
 
-if (!componentName) {
-  console.error("\x1b[31m%s\x1b[0m", "Error: Please specify a component name.");
-  console.log("Usage: npx nh-library <ComponentName>");
-  process.exit(1);
-}
-
-// 3. Load the registry
+// 1. Load Registry
 const registryPath = path.join(libraryRoot, "registry", "components.json");
-
 if (!fs.existsSync(registryPath)) {
-  console.error("\x1b[31m%s\x1b[0m", "Error: Registry file not found in the library.");
+  console.error("❌ Registry not found.");
   process.exit(1);
 }
-
 const registry = require(registryPath);
 
-const componentConfig = registry[componentName];
-
-if (!componentConfig) {
-  console.error("\x1b[31m%s\x1b[0m", `Error: Component "${componentName}" not found in registry.`);
-  console.log("Available components:", Object.keys(registry).join(", "));
+if (!componentName || !registry[componentName]) {
+  console.error(`❌ Component "${componentName || ''}" not found.`);
+  console.log("Available:", Object.keys(registry).join(", "));
   process.exit(1);
 }
 
-// 4. Define Destination (Standardizing on src/components/ui)
-const destFolder = path.join(projectRoot, "src", "components", "ui", componentName);
+async function downloadComponent() {
+  const componentConfig = registry[componentName];
+  const projectRoot = process.cwd();
+  
+  // Smart pathing: if user is in 'src', don't add another 'src'
+  const baseFolder = path.basename(projectRoot) === "src" ? "" : "src";
+  const destFolder = path.join(projectRoot, baseFolder, "components", "ui", componentName);
 
-// 5. Recursive Copy Function
-function copyRecursive(src, dest) {
-  const exists = fs.existsSync(src);
-  const stats = exists && fs.statSync(src);
-  const isDirectory = exists && stats.isDirectory();
-
-  if (isDirectory) {
-    if (!fs.existsSync(dest)) {
-      fs.mkdirSync(dest, { recursive: true });
-    }
-    fs.readdirSync(src).forEach((childItemName) => {
-      copyRecursive(
-        path.join(src, childItemName),
-        path.join(dest, childItemName)
-      );
-    });
-  } else {
-    fs.copyFileSync(src, dest);
-    console.log(`  \x1b[32m%s\x1b[0m`, `ADDED: ${path.relative(projectRoot, dest)}`);
+  if (!fs.existsSync(destFolder)) {
+    fs.mkdirSync(destFolder, { recursive: true });
   }
-}
 
-// 6. Execution
-console.log(`\nInstalling ${componentName} into your project...`);
+  console.log(`\n🚀 Installing ${componentName}...`);
 
-try {
-  componentConfig.files.forEach((fileRelativePath) => {
-    // Construct the absolute path to the source in node_modules
-    const sourcePath = path.join(libraryRoot, fileRelativePath);
+  for (const fileRelativePath of componentConfig.files) {
+    const url = `${RAW_BASE_URL}${fileRelativePath}`;
+    const fileName = path.basename(fileRelativePath);
+    const destPath = path.join(destFolder, fileName);
 
-    if (fs.existsSync(sourcePath)) {
-      copyRecursive(sourcePath, destFolder);
-    } else {
-      console.warn(`\x1b[33m%s\x1b[0m`, `Warning: Source path not found: ${fileRelativePath}`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`${response.statusText}`);
+      
+      const content = await response.text();
+      fs.writeFileSync(destPath, content);
+      console.log(`  ✅ Downloaded: ${fileName}`);
+    } catch (err) {
+      console.error(`  ❌ Failed to download ${fileName}: ${err.message}`);
     }
-  });
+  }
 
-  console.log(`\n\x1b[32m%s\x1b[0m`, `Success! ${componentName} is ready to use.`);
-  console.log(`Location: /src/components/ui/${componentName}\n`);
-} catch (error) {
-  console.error("\x1b[31m%s\x1b[0m", "An error occurred during installation:");
-  console.error(error);
+  console.log(`\n✨ Success! ${componentName} is now in /src/components/ui/${componentName}\n`);
 }
+
+downloadComponent();

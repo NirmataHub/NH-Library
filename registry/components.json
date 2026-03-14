@@ -1,5 +1,20 @@
 {
-  "ComponentTestOne": { "files": ["Components/ComponentTestOne"] },
-  "ComponentTestTwo": { "files": ["Components/ComponentTestTwo"] },
-  "ComponentTestTree": { "files": ["Components/ComponentTestTree"] }
+  "ComponentTestOne": {
+    "files": [
+      "Components/ComponentTestOne/ComponentTest.css",
+      "Components/ComponentTestOne/ComponentTest.jsx"
+    ]
+  },
+  "ComponentTestTwo": {
+    "files": [
+      "Components/ComponentTestTwo/ComponentTest.css",
+      "Components/ComponentTestTwo/ComponentTestTwo.jsx"
+    ]
+  },
+  "ComponentTestTree": {
+    "files": [
+      "Components/ComponentTestTree/ComponentTest.css",
+      "Components/ComponentTestTree/ComponentTestTree.jsx"
+    ]
+  }
 }

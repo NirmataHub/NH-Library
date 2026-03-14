@@ -3,7 +3,7 @@ import "./ComponentTest.css"
 const ComponentTest = () => {
   return (
     <div>
-      <h1>Nirmata is here! </h1>
+      <h1>NH-Lib is on Git! </h1>
     </div>
   )
 }
